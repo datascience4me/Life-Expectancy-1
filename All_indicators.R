@@ -2,8 +2,8 @@
 wdi_data<-read.csv('D:/dropbox/Dropbox/IIT/Applied Statistics/Project/WDI_csv/WDI_Data.csv',header=T, sep=",", fill = TRUE)
 wdi_countries<-read.csv('D:/dropbox/Dropbox/IIT/Applied Statistics/Project/WDI_csv/WDI_Country.csv',header=T, sep=",", fill = TRUE)
 
-indicator_codes<-data.frame(Code=c("SH.IMM.IDPT", "SP.DYN.LE00.IN","SH.XPD.PCAP","SH.STA.ACSN","NY.GDP.PCAP.CD","SL.UEM.TOTL.ZS","SP.RUR.TOTL.ZS","SE.PRM.CMPT.ZS","SH.DYN.MORT"),
-                            Name=c("Immunizations","Life_expectancy", "Health_expenditure", "Sanitation", "GDP", "Unemployment", "Rural", "Primary", "Mortality")       
+indicator_codes<-data.frame(Code=c("SH.IMM.IDPT", "SP.DYN.LE00.IN","SH.XPD.PCAP","SH.STA.ACSN","NY.GDP.PCAP.CD","SL.UEM.TOTL.ZS","SP.RUR.TOTL.ZS","SE.PRM.CMPT.ZS","SH.DYN.MORT","SP.POP.GROW", "SH.H2O.SAFE.RU.ZS","SH.H2O.SAFE.UR.ZS","SP.POP.TOTL"),
+                            Name=c("Immunizations","Life_expectancy", "Health_expenditure", "Sanitation", "GDP", "Unemployment", "Rural", "Primary", "Mortality", "Population_Grow","Water_Access_Rural", "Water_Access_Urban","Population")       
                             )
 
 #obtain all countries
@@ -13,6 +13,7 @@ all_indicators = data.frame(Country.Code=countries$Country.Code)
 
 #add region, filtering those who are not countries (do not belong to a region)
 all_indicators = merge(all_indicators,subset(wdi_countries[c("Country.Code","Region")],nchar(as.character(Region)) > 0))
+all_indicators$Region = as.factor(all_indicators$Region)
 
 #add indicators
 for(i in 1:nrow(indicator_codes)) {
@@ -21,8 +22,12 @@ for(i in 1:nrow(indicator_codes)) {
  all_indicators = merge(all_indicators,indicator)
 }
 
+#Get the number of NA values per indicator
+colSums(is.na(all_indicators))
+
 #How many countries are complete?
 nrow(all_indicators[!complete.cases(all_indicators),])
+
 #Thus, we cannot eliminate those observations. We have to estimate their values
 
 #option 1: replace with the mean
@@ -45,10 +50,10 @@ plot(Mortality, Life_expectancy, xlab='Mortality',ylab='Life Expectancy',type='p
 plot(Rural, Life_expectancy, xlab='Mortality',ylab='Life Expectancy',type='p', main='scatter plot of Life Expectancy Vs. Sanitation')
 plot(GDP, Life_expectancy, xlab='GDP',ylab='Life Expectancy',type='p', main='scatter plot of Life Expectancy Vs. Sanitation')
 plot(GDP, Unemployment, xlab='GDP',ylab='Life Expectancy',type='p', main='scatter plot of Life Expectancy Vs. Sanitation')
-
 detach(all_indicators)
 
+#fit model
 attach(all_indicators)
-fit<-lm(Life_expectancy~Immunizations+Health_expenditure+Sanitation+GDP+Unemployment+Rural+Primary+Mortality, data=allIndicators)
+fit<-lm(Life_expectancy~Immunizations+Health_expenditure+Sanitation+GDP+Unemployment+Rural+Primary+Mortality+Population_Grow+Water_Access_Rural+Water_Access_Urban+Population+Region, data=all_indicators)
 summary(fit)
 detach(all_indicators)
