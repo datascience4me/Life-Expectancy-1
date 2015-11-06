@@ -12,13 +12,21 @@ library(tidyr)
 tbl_df(all_indicators)
 
 #Get collinearity matrix
-collinearity_matrix<-cor(select(all_indicators,-Life_expectancy,-Region,-Country.Code))
+collinearity_matrix<-cor(select(all_indicators,-Region,-Country.Code,-Country.Name))
 collinearity_matrix
+#which are the pairs of indicators with corr > 0.9
+for(i in (which(collinearity_matrix > 0.9))){
+  print(i)
+  k<-arrayInd(i,dim(collinearity_matrix))
+  print(rownames(collinearity_matrix)[k[,1]])
+  print(colnames(collinearity_matrix)[k[,2]])
+}
 
 #get vif values
-fit<-lm(Life_expectancy~Immunizations+Health_expenditure+Sanitation+GDP+Unemployment+Rural+Primary+Mortality+Population_Grow+Water_Access_Rural+Water_Access_Urban+Population+Region, data=all_indicators)
+attach(all_indicators)
+fit<-lm(Life_expectancy~., data=select(all_indicators,-Life_expectancy,-Country.Code,-Country.Name))
 vif<-vif(fit)
-
+detach(all_indicators)
 #Average vif is >> 1?
 mean(vif)
 #max vif > 10?
