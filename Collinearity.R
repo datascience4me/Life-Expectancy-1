@@ -43,9 +43,36 @@ for (i in 1:12) {
 }
 lines(model.size,min.cp)
 
-#Stepwise Regression
+#Stepwise Regression forward. Two options of formulas
 fit0<-lm(Life_expectancy~1,data=all_indicators)
-scope<-list(upper=Life_expectacy~Immunizations+Health_expenditure+Sanitation+GDP+Unemployment+Rural+Primary+Mortality+Population_Grow+Water_Access_Rural+Water_Access_Urban+Population+Region, lower=Sales~1)
+formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
+formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
+scope<-list(upper=formula, lower=Life_expectancy~1)
 fit.forward<-step(fit0,direction='forward',scope=scope)
+
+#Stepwise Regression backward. Two options of formulas
+formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
+formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
+fit<-lm(formula,data=all_indicators)
 fit.backward<-step(fit,direction='backward',scope=scope)
+
+#Stepwise Regression backward. Two options of formulas
+formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
+formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
+fit<-lm(formula,data=all_indicators)
 fit.both<-step(fit,direction='both',scope=scope)
+
+#using BIC
+fit0<-lm(Life_expectancy~1,data=all_indicators)
+formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
+formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
+scope<-list(upper=formula_with_interaction, lower=Life_expectancy~1)
+fit.forward<-step(fit0,direction='forward',scope=scope,  k=log(nrow(all_indicators)))
+
+#using cp
+
+fit0<-lm(Life_expectancy~1,data=all_indicators)
+formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
+formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
+scope<-list(upper=formula_with_interaction, lower=Life_expectancy~1)
+fit.forward<-step(fit0,direction='forward',scope=scope, scale=(summary(fit)$sigma)^2)
