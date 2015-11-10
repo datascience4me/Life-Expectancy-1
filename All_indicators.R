@@ -13,13 +13,11 @@ indicator_codes<-data.frame(Code=c("EG.ELC.ACCS.ZS", "SE.PRM.GINT.FE.ZS","SE.PRM
                             )
 
 #obtain all countries
-countries<-unique(wdi_data[c("Country.Code","Country.Name")])
-#intialize all_indicators with only country code
-all_indicators = data.frame(Country.Code=countries$Country.Code, Country.Name=countries$Country.Name)
+all_indicators<-unique(wdi_data[c("Country.Code","Country.Name")])
+#intialize all_indicators with only country code and country name
 
 #add region, filtering those who are not countries (do not belong to a region)
 all_indicators = merge(all_indicators,subset(wdi_countries[c("Country.Code","Region")],nchar(as.character(Region)) > 0))
-all_indicators$Region = as.factor(all_indicators$Region)
 
 #add indicators
 for(i in 1:nrow(indicator_codes)) {
@@ -34,12 +32,12 @@ for(i in 1:nrow(indicator_codes)) {
 colSums(is.na(all_indicators))
 
 #keep indicators with na values < 40
-all_indicators <- all_indicators[,which(colSums(is.na(all_indicators)) < 40)]
+all_indicators <- all_indicators[,which(colSums(is.na(all_indicators)) < 30)]
 
 #keep countries with no na values
 rowSums(is.na(all_indicators))
 #get eliminated countries
-all_indicators[which(rowSums(is.na(all_indicators)) > 1),]
+all_indicators[which(rowSums(is.na(all_indicators)) > 0),]
 #keep countries with no na values
 all_indicators <- all_indicators[which(rowSums(is.na(all_indicators)) < 1),]
 
