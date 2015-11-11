@@ -8,6 +8,7 @@ library(HH)
 library(leaps)
 library(dplyr)
 library(tidyr)
+
 #Get Data
 tbl_df(all_indicators)
 
@@ -32,6 +33,8 @@ mean(vif)
 #max vif > 10?
 max(vif) > 10
 
+all_indicators<-merge(all_indicators,squared_terms)
+
 #Exhaustive search
 best.fit<-regsubsets(x=select(all_indicators,-Region,-Life_expectancy,-Country.Code), y=all_indicators$Life_expectancy,data=all_indicators,nbest=10,nvmax=12)
 best.fit.results<-summary(best.fit)
@@ -46,8 +49,8 @@ lines(model.size,min.cp)
 #Stepwise Regression forward. Two options of formulas
 fit0<-lm(Life_expectancy~1,data=all_indicators)
 formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
-formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
-scope<-list(upper=formula, lower=Life_expectancy~1)
+formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse=" + "),paste(), sep=""))
+scope<-list(upper=formula_with_interaction, lower=Life_expectancy~1)
 fit.forward<-step(fit0,direction='forward',scope=scope)
 
 #Stepwise Regression backward. Two options of formulas
@@ -70,7 +73,6 @@ scope<-list(upper=formula_with_interaction, lower=Life_expectancy~1)
 fit.forward<-step(fit0,direction='forward',scope=scope,  k=log(nrow(all_indicators)))
 
 #using cp
-
 fit0<-lm(Life_expectancy~1,data=all_indicators)
 formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
 formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
