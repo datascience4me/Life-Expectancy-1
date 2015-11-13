@@ -25,3 +25,13 @@ attach(all_indicators)
 fit<-lm(Life_expectancy~Immunizations+Health_expenditure+Sanitation+GDP+Unemployment+Rural+Primary+Mortality+Population_Grow+Water_Access_Rural+Water_Access_Urban+Population+Region, data=all_indicators)
 summary(fit)
 detach(all_indicators)
+
+
+#delete outliers
+fit.full.2<-lm(formula_full,data=all_indicators_with_squared[which(abs(press)<qt(1-0.005,n-k-2)),])
+fit0.2<-lm(Life_expectancy~1,data=all_indicators_with_squared[which(abs(press)<qt(1-0.005,n-k-2)),])
+scope<-list(upper=formula_full, lower=Life_expectancy~1)
+
+#Stepwise Regression forward.
+#using BIC
+fit.forward.bic.2<-step(fit0.2,direction='forward',scope=scope,  k=log(nrow(all_indicators_with_squared[which(abs(press)<qt(1-0.005,n-k-2)),])))
