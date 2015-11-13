@@ -68,7 +68,7 @@ Tuberculosis_incidence.2<-all_indicators$Tuberculosis_incidence*all_indicators$T
 
 #add squared terms to all_indicators
 squared_terms<-data.frame(Country.Code=all_indicators$Country.Code,Access_electricity.2,Immunizations_DPT.2,Health_expenditure.2,Sanitation.2,GDP.2,Rural.2,Population_Grow.2,Water_Access_Rural.2,Water_Access_Urban.2,Population.2,CO_Emissions.2,Immunizations_measless.2,Adolescent_Fertitlity_rate.2,Tuberculosis_incidence.2)
-
+all_indicators_with_squared<-merge(all_indicators,squared_terms)
 
 
 

@@ -33,7 +33,36 @@ mean(vif)
 #max vif > 10?
 max(vif) > 10
 
-all_indicators<-merge(all_indicators,squared_terms)
+#model selection
+formula_full<-as.formula(paste(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Region,-Country.Code, -Country.Name)),collapse="+"),")^2+Region+", sep=""),paste(colnames(select(squared_terms,-Country.Code)),collapse="+"),sep=""))
+scope<-list(upper=formula_full, lower=Life_expectancy~1)
+fit.full<-lm(formula_full,data=all_indicators_with_squared)
+fit0<-lm(Life_expectancy~1,data=all_indicators)
+
+#Stepwise Regression forward.
+#using AIC
+fit.forward.aic<-step(fit0,direction='forward',scope=scope)
+#using BIC
+fit.forward.bic<-step(fit0,direction='forward',scope=scope,  k=log(nrow(all_indicators)))
+#using cp
+fit.forward.cp<-step(fit0,direction='forward',scope=scope, scale=(summary(fit.full)$sigma)^2)
+
+
+#Backward Elimination
+#using AIC
+fit.backward.aic<-step(fit.full,direction='backward',scope=scope)
+#using BIC
+fit.backward.bic<-step(fit.full,direction='backward',scope=scope, k=log(nrow(all_indicators)))
+#using CP
+fit.backward.cp<-step(fit.full,direction='backward',scope=scope, scale=(summary(fit.full)$sigma)^2)
+
+#both directions
+#using aic
+fit.both.aic<-step(fit.full,direction='both',scope=scope)
+#using bic
+fit.both.bic<-step(fit.full,direction='backward',scope=scope, k=log(nrow(all_indicators)))
+#using CP
+fit.both.cp<-step(fit.full,direction='backward',scope=scope, scale=(summary(fit.full)$sigma)^2)
 
 #Exhaustive search
 best.fit<-regsubsets(x=select(all_indicators,-Region,-Life_expectancy,-Country.Code), y=all_indicators$Life_expectancy,data=all_indicators,nbest=10,nvmax=12)
@@ -45,36 +74,3 @@ for (i in 1:12) {
   min.cp[i]<-min(best.fit.results$cp[(rowSums(best.fit.results$which))==(i+1)])
 }
 lines(model.size,min.cp)
-
-#Stepwise Regression forward. Two options of formulas
-fit0<-lm(Life_expectancy~1,data=all_indicators)
-formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
-formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse=" + "),paste(), sep=""))
-scope<-list(upper=formula_with_interaction, lower=Life_expectancy~1)
-fit.forward<-step(fit0,direction='forward',scope=scope)
-
-#Stepwise Regression backward. Two options of formulas
-formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
-formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
-fit<-lm(formula,data=all_indicators)
-fit.backward<-step(fit,direction='backward',scope=scope)
-
-#Stepwise Regression backward. Two options of formulas
-formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
-formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
-fit<-lm(formula,data=all_indicators)
-fit.both<-step(fit,direction='both',scope=scope)
-
-#using BIC
-fit0<-lm(Life_expectancy~1,data=all_indicators)
-formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
-formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
-scope<-list(upper=formula_with_interaction, lower=Life_expectancy~1)
-fit.forward<-step(fit0,direction='forward',scope=scope,  k=log(nrow(all_indicators)))
-
-#using cp
-fit0<-lm(Life_expectancy~1,data=all_indicators)
-formula_with_interaction<-as.formula(paste("Life_expectancy ~ (",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"),")^2", sep=""))
-formula<-as.formula(paste("Life_expectancy ~ ",paste(colnames(select(all_indicators,-Life_expectancy, -Country.Code, -Country.Name)),collapse="+"), sep=""))
-scope<-list(upper=formula_with_interaction, lower=Life_expectancy~1)
-fit.forward<-step(fit0,direction='forward',scope=scope, scale=(summary(fit)$sigma)^2)
