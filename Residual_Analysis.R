@@ -25,3 +25,10 @@ plot(all_indicatos_after_outliers_removed$Region, Life_expectancy.res, xlab = "R
 #Assumption 3--QQ Plot
 qqnorm(fit.forward.bic.2$residuals)
 qqline(fit.forward.bic.2$residuals)
+
+#diagrams of interest
+par(mfrow=c(2,2))
+plot(all_indicatos_after_outliers_removed$Tuberculosis_incidence, Life_expectancy.res, xlab = "Tuberculosis Incidence", ylab = "Residuals")
+plot(all_indicatos_after_outliers_removed$GDP, Life_expectancy.res, xlab = "GDP per capita", ylab = "Residuals")
+plot(all_indicatos_after_outliers_removed$GDP.2, Life_expectancy.res, xlab = "GDP per capita^2", ylab = "Residuals")
+plot(all_indicatos_after_outliers_removed$CO_Emissions.2, Life_expectancy.res, xlab = "CO Emissions^2", ylab = "Residuals")
